@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="top-bar">
+      <div class="brand">
+        <iconify-icon icon="pixelarticons:artboard" class="logo-icon"></iconify-icon>
+      </div>
+      
+      <div class="actions">
+        <div class="tool-group">
+          <button id="drawTool" class="tool-btn active" title="Draw">
+            <iconify-icon icon="pixelarticons:edit"></iconify-icon>
+            <span>Draw</span>
+          </button>
+          <button id="eraseTool" class="tool-btn" title="Erase">
+            <iconify-icon icon="pixelarticons:close"></iconify-icon>
+            <span>Erase</span>
+          </button>
+        </div>
+        
+        <div class="v-divider"></div>
+        
+        <button id="uploadBtn" class="action-btn" title="Upload Image">
+          <iconify-icon icon="pixelarticons:image"></iconify-icon>
+        </button>
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+        
+        <button id="clearBtn" class="action-btn" title="Clear Grid">
+          <iconify-icon icon="pixelarticons:trash"></iconify-icon>
+        </button>
+        
+        <div class="v-divider"></div>
+        
+        <button id="exportBtn" class="export-btn">
+          <iconify-icon icon="pixelarticons:download"></iconify-icon>
+          <span>Export</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="toolbar-sidebar">
+      <div id="stylePresets" class="style-presets-sidebar">
+        <!-- Preset buttons will be injected here -->
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-content">
+        
+        <!-- Canvas Section -->
+        <details class="menu-section" open>
+          <summary>Canvas <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
+          <div class="section-body">
+            <div class="slider-group">
+              <label>Grid Size</label>
+              <select id="gridSize">
+                <option value="4">4×4</option>
+                <option value="5">5×5</option>
+                <option value="7">7×7</option>
+                <option value="8">8×8</option>
+                <option value="9">9×9</option>
+                <option value="10">10×10</option>
+                <option value="11">11×11</option>
+                <option value="12" selected>12×12</option>
+                <option value="13">13×13</option>
+                <option value="14">14×14</option>
+                <option value="15">15×15</option>
+                <option value="16">16×16</option>
+                <option value="21">21×21</option>
+                <option value="24">24×24</option>
+                <option value="25">25×25</option>
+                <option value="32">32×32</option>
+                <option value="64">64×64</option>
+                <option value="128">128×128</option>
+              </select>
+            </div>
+            <label class="toggle-item">
+              <input type="checkbox" id="toggleGrid" checked>
+              <span>Show Grid Lines</span>
+            </label>
+          </div>
+        </details>
+
+        <!-- Block Styling Section -->
+        <details class="menu-section" open>
+          <summary>Block Style <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
+          <div class="section-body">
+            <div class="slider-group">
+              <label>Color</label>
+              <div class="color-swatch-group" id="blockColorGroup">
+                <input type="color" id="colorPicker" value="#ffffff" title="Custom Color">
+              </div>
+            </div>
+            <div class="slider-group">
+              <label for="roundness">Roundness</label>
+              <input type="range" id="roundness" min="0" max="50" value="20">
+            </div>
+            <div class="slider-group">
+              <label for="blockSize">Size</label>
+              <input type="range" id="blockSize" min="10" max="100" value="100">
+            </div>
+            <div class="slider-group">
+              <div class="control-row" style="width: 100%; margin-bottom: 0;">
+                <label for="outlineWidth">Outline</label>
+                <input type="color" id="outlineColor" value="#000000" title="Outline Color" style="width: 18px; height: 18px;">
+              </div>
+              <input type="range" id="outlineWidth" min="0" max="20" value="0">
+            </div>
+          </div>
+        </details>
+
+        <!-- FX Section -->
+        <details class="menu-section">
+          <summary>Effects <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
+          <div class="section-body">
+            <div class="slider-group">
+              <label for="bloom">Bloom</label>
+              <input type="range" id="bloom" min="0" max="100" value="0">
+            </div>
+            <div class="slider-group">
+              <label for="grain">Grain Intensity</label>
+              <input type="range" id="grain" min="0" max="100" value="0">
+            </div>
+            <div class="slider-group">
+              <label for="grainSize">Grain Size</label>
+              <input type="range" id="grainSize" min="1" max="10" step="0.5" value="1" disabled>
+            </div>
+            <div class="slider-group">
+              <label>Box Shadow</label>
+              <div class="control-row">
+                <input type="color" id="shadowColor" value="#000000">
+                <div class="slider-inner">
+                  <label for="shadowBlur">Blur</label>
+                  <input type="range" id="shadowBlur" min="0" max="100" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Connections Section -->
+        <details class="menu-section">
+          <summary>Connections <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
+          <div class="section-body">
+            <label class="toggle-item" style="margin-bottom: 12px;">
+              <input type="checkbox" id="toggleConnections" checked>
+              <span>Enable Connections</span>
+            </label>
+            <div class="slider-group">
+              <label>Style</label>
+              <select id="connectionStyle">
+                <option value="standard" selected>Standard</option>
+                <option value="line">Line Only</option>
+              </select>
+            </div>
+            <div id="lineOnlyControls" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
+              <div class="slider-group">
+                <label for="connectionDistance">Distance</label>
+                <input type="range" id="connectionDistance" min="1" max="4" value="1">
+              </div>
+              <div class="slider-group">
+                <label for="connectionThickness">Line Thickness</label>
+                <input type="range" id="connectionThickness" min="1" max="20" value="2">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Background Section -->
+        <details class="menu-section">
+          <summary>Background <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
+          <div class="section-body">
+            <div class="slider-group">
+              <label>Mode</label>
+              <select id="bgType">
+                <option value="solid">Solid</option>
+                <option value="gradient">Gradient</option>
+                <option value="transparent">Transparent</option>
+              </select>
+            </div>
+            
+            <div id="solidBgControls" class="control-row" style="margin-top: 4px;">
+              <div class="color-swatch-group" id="solidBgGroup">
+                <input type="color" id="bgColor" value="#000000" title="Custom Background Color">
+              </div>
+            </div>
+
+            <div id="gradientBgControls" style="display: none; flex-direction: column; gap: 12px; margin-top: 8px;">
+              <div class="color-swatch-group" id="gradientSwatches"></div>
+              <div class="slider-group">
+                <label>Gradient Type</label>
+                <select id="gradientType">
+                  <option value="linear">Linear</option>
+                  <option value="radial">Radial</option>
+                </select>
+              </div>
+              <div class="slider-group-inline">
+                <input type="color" id="bgGradStart" value="#ffffff">
+                <div class="slider-inner">
+                  <label for="gradientStopStart">Start</label>
+                  <input type="range" id="gradientStopStart" min="0" max="100" value="0">
+                </div>
+              </div>
+              <div class="slider-group-inline">
+                <input type="color" id="bgGradEnd" value="#e0e0e0">
+                <div class="slider-inner">
+                  <label for="gradientStopEnd">End</label>
+                  <input type="range" id="gradientStopEnd" min="0" max="100" value="100">
+                </div>
+              </div>
+              <div class="slider-group" id="gradientAngleControl">
+                <label for="gradientAngle">Angle</label>
+                <input type="range" id="gradientAngle" min="0" max="360" value="135">
+              </div>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </div>
+    
+    <div class="canvas-container">
+      <canvas id="gridCanvas"></canvas>
+    </div>
+  </div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "state": "./state.js",
+      "renderer": "./renderer.js",
+      "background-renderer": "./background-renderer.js",
+      "logo-renderer": "./logo-renderer.js",
+      "fx-processor": "./fx-processor.js",
+      "ui": "./ui.js",
+      "exporter": "./exporter.js",
+      "presets": "./presets.js"
+    }
+  }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
