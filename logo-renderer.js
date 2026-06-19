@@ -6,12 +6,13 @@ export class LogoRenderer {
       const ny = y + dy * d;
       if (nx < 0 || ny < 0 || nx >= gridSize || ny >= gridSize) continue;
       const nCell = grid[ny][nx];
-      if (nCell.active && nCell.color === cell.color) return nCell.scale;
+      // Only connect if shapes are standard joinable (rounded/square)
+      const joinableShapes = ['rounded', 'square'];
+      if (nCell.active && nCell.color === cell.color && joinableShapes.includes(nCell.shape)) return nCell.scale;
     }
     return 0;
   }
 
-  // Calculate connection strength based on scales (0.5 -> 1.0 ramp)
   static getConnStrength(s1, s2) {
     const minS = Math.min(s1, s2);
     return Math.max(0, Math.min(1, (minS - 0.5) * 2));
@@ -28,110 +29,13 @@ export class LogoRenderer {
           const posX = x * cellSize + offset;
           const posY = y * cellSize + offset;
 
-          let tl = radius * cell.scale, tr = radius * cell.scale, br = radius * cell.scale, bl = radius * cell.scale;
-
-          const isStandard = state.connectionStyle === 'standard';
-          
-          let sT = 0, sR = 0, sB = 0, sL = 0;
-          let connT = false, connR = false, connB = false, connL = false;
-
-          if (isStandard) {
-             sT = this.checkMatch(x, y, 0, -1, grid, gridSize, cell, state);
-             sR = this.checkMatch(x, y, 1, 0, grid, gridSize, cell, state);
-             sB = this.checkMatch(x, y, 0, 1, grid, gridSize, cell, state);
-             sL = this.checkMatch(x, y, -1, 0, grid, gridSize, cell, state);
-             
-             const sTL = this.checkMatch(x, y, -1, -1, grid, gridSize, cell, state);
-             const sTR = this.checkMatch(x, y, 1, -1, grid, gridSize, cell, state);
-             const sBR = this.checkMatch(x, y, 1, 1, grid, gridSize, cell, state);
-             const sBL = this.checkMatch(x, y, -1, 1, grid, gridSize, cell, state);
-
-             // Morph corners based on connection strength
-             tl *= (1 - this.getConnStrength(cell.scale, Math.max(sT, sL, sTL)));
-             tr *= (1 - this.getConnStrength(cell.scale, Math.max(sT, sR, sTR)));
-             br *= (1 - this.getConnStrength(cell.scale, Math.max(sB, sR, sBR)));
-             bl *= (1 - this.getConnStrength(cell.scale, Math.max(sB, sL, sBL)));
-
-             // For outline edge skipping
-             connT = this.getConnStrength(cell.scale, sT) > 0.01;
-             connR = this.getConnStrength(cell.scale, sR) > 0.01;
-             connB = this.getConnStrength(cell.scale, sB) > 0.01;
-             connL = this.getConnStrength(cell.scale, sL) > 0.01;
-          }
-
           if (!isOutline) {
             ctx.fillStyle = cell.color;
-            if (tl <= 0.1 && tr <= 0.1 && br <= 0.1 && bl <= 0.1) {
-              ctx.fillRect(posX, posY, drawSize, drawSize);
-            } else {
-              ctx.beginPath();
-              if (ctx.roundRect) {
-                ctx.roundRect(posX, posY, drawSize, drawSize, [tl, tr, br, bl]);
-              } else {
-                this.drawRoundedRectFallback(ctx, posX, posY, drawSize, drawSize, tl, tr, br, bl);
-              }
-              ctx.fill();
-            }
+            // Add a tiny 0.5px bleed to prevent sub-pixel gaps between adjacent blocks
+            this.renderShape(ctx, cell.shape, posX - 0.25, posY - 0.25, drawSize + 0.5, radius, cell.scale, x, y, grid, gridSize, cell, state, false);
           } else {
-            // Smart Outline Drawing - Skip shared edges
-            ctx.beginPath();
-            let penActive = false;
-
-            // Top Edge
-            if (!connT) {
-              ctx.moveTo(posX + tl, posY);
-              ctx.lineTo(posX + drawSize - tr, posY);
-              penActive = true;
-            } else { penActive = false; }
-
-            // TR Corner
-            if (tr > 0) {
-              if (!penActive) ctx.moveTo(posX + drawSize - tr, posY);
-              ctx.arc(posX + drawSize - tr, posY + tr, tr, 1.5 * Math.PI, 0);
-              penActive = true;
-            }
-
-            // Right Edge
-            if (!connR) {
-              if (!penActive) ctx.moveTo(posX + drawSize, posY + tr);
-              ctx.lineTo(posX + drawSize, posY + drawSize - br);
-              penActive = true;
-            } else { penActive = false; }
-
-            // BR Corner
-            if (br > 0) {
-              if (!penActive) ctx.moveTo(posX + drawSize, posY + drawSize - br);
-              ctx.arc(posX + drawSize - br, posY + drawSize - br, br, 0, 0.5 * Math.PI);
-              penActive = true;
-            }
-
-            // Bottom Edge
-            if (!connB) {
-              if (!penActive) ctx.moveTo(posX + drawSize - br, posY + drawSize);
-              ctx.lineTo(posX + bl, posY + drawSize);
-              penActive = true;
-            } else { penActive = false; }
-
-            // BL Corner
-            if (bl > 0) {
-              if (!penActive) ctx.moveTo(posX + bl, posY + drawSize);
-              ctx.arc(posX + bl, posY + drawSize - bl, bl, 0.5 * Math.PI, Math.PI);
-              penActive = true;
-            }
-
-            // Left Edge
-            if (!connL) {
-              if (!penActive) ctx.moveTo(posX, posY + drawSize - bl);
-              ctx.lineTo(posX, posY + tl);
-              penActive = true;
-            } else { penActive = false; }
-
-            // TL Corner
-            if (tl > 0) {
-              if (!penActive) ctx.moveTo(posX, posY + tl);
-              ctx.arc(posX + tl, posY + tl, tl, Math.PI, 1.5 * Math.PI);
-            }
-            ctx.stroke();
+            ctx.strokeStyle = state.outlineColor;
+            this.renderShape(ctx, cell.shape, posX, posY, drawSize, radius, cell.scale, x, y, grid, gridSize, cell, state, true);
           }
         }
       }
@@ -139,6 +43,126 @@ export class LogoRenderer {
 
     if (state.showConnections) {
       this.drawConnections(ctx, width, height, cellSize, gridSize, grid, scale, radius, isOutline, state);
+    }
+  }
+
+  static renderShape(ctx, shape, x, y, size, radius, cellScale, gridX, gridY, grid, gridSize, cell, state, isOutline) {
+    ctx.beginPath();
+    const r = radius * cellScale;
+
+    switch (shape) {
+      case 'circle':
+        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+        break;
+      case 'square':
+        ctx.rect(x, y, size, size);
+        break;
+      case 'rounded':
+        this.drawSmartRounded(ctx, x, y, size, r, cellScale, gridX, gridY, grid, gridSize, cell, state);
+        break;
+      case 'diagonal-tl':
+        ctx.moveTo(x, y); ctx.lineTo(x + size, y); ctx.lineTo(x, y + size); ctx.closePath();
+        break;
+      case 'diagonal-tr':
+        ctx.moveTo(x, y); ctx.lineTo(x + size, y); ctx.lineTo(x + size, y + size); ctx.closePath();
+        break;
+      case 'diagonal-bl':
+        ctx.moveTo(x, y); ctx.lineTo(x, y + size); ctx.lineTo(x + size, y + size); ctx.closePath();
+        break;
+      case 'diagonal-br':
+        ctx.moveTo(x + size, y); ctx.lineTo(x + size, y + size); ctx.lineTo(x, y + size); ctx.closePath();
+        break;
+      case 'diamond':
+        ctx.moveTo(x + size/2, y); ctx.lineTo(x + size, y + size/2); ctx.lineTo(x + size/2, y + size); ctx.lineTo(x, y + size/2); ctx.closePath();
+        break;
+      case 'corner-tl':
+        ctx.moveTo(x, y); ctx.arc(x, y, size, 0, Math.PI * 0.5); ctx.closePath();
+        break;
+      case 'corner-tr':
+        ctx.moveTo(x + size, y); ctx.arc(x + size, y, size, Math.PI * 0.5, Math.PI); ctx.closePath();
+        break;
+      case 'corner-bl':
+        ctx.moveTo(x, y + size); ctx.arc(x, y + size, size, Math.PI * 1.5, Math.PI * 2); ctx.closePath();
+        break;
+      case 'corner-br':
+        ctx.moveTo(x + size, y + size); ctx.arc(x + size, y + size, size, Math.PI, Math.PI * 1.5); ctx.closePath();
+        break;
+      case 'concave-tl':
+        ctx.moveTo(x + size, y); ctx.lineTo(x + size, y + size); ctx.lineTo(x, y + size); 
+        ctx.arc(x, y, size, Math.PI * 0.5, 0, true); ctx.closePath();
+        break;
+      case 'concave-tr':
+        ctx.moveTo(x + size, y + size); ctx.lineTo(x, y + size); ctx.lineTo(x, y); 
+        ctx.arc(x + size, y, size, Math.PI, Math.PI * 0.5, true); ctx.closePath();
+        break;
+      case 'concave-bl':
+        ctx.moveTo(x, y); ctx.lineTo(x + size, y); ctx.lineTo(x + size, y + size); 
+        ctx.arc(x, y + size, size, 0, Math.PI * 1.5, true); ctx.closePath();
+        break;
+      case 'concave-br':
+        ctx.moveTo(x, y + size); ctx.lineTo(x, y); ctx.lineTo(x + size, y); 
+        ctx.arc(x + size, y + size, size, Math.PI * 1.5, Math.PI, true); ctx.closePath();
+        break;
+      case 'triangle-up':
+        ctx.moveTo(x + size/2, y); ctx.lineTo(x + size, y + size); ctx.lineTo(x, y + size); ctx.closePath();
+        break;
+      case 'triangle-down':
+        ctx.moveTo(x, y); ctx.lineTo(x + size, y); ctx.lineTo(x + size/2, y + size); ctx.closePath();
+        break;
+      case 'triangle-left':
+        ctx.moveTo(x + size, y); ctx.lineTo(x + size, y + size); ctx.lineTo(x, y + size/2); ctx.closePath();
+        break;
+      case 'triangle-right':
+        ctx.moveTo(x, y); ctx.lineTo(x + size, y + size/2); ctx.lineTo(x, y + size); ctx.closePath();
+        break;
+      case 'plus':
+        const thick = size * 0.35;
+        const off = (size - thick) / 2;
+        ctx.rect(x + off, y, thick, size);
+        ctx.rect(x, y + off, size, thick);
+        break;
+      default:
+        ctx.rect(x, y, size, size);
+    }
+    
+    if (isOutline) {
+      // For standard rounded we use a special outlined drawer to handle smart edge hiding
+      if (shape === 'rounded' && state.connectionStyle === 'standard') {
+        // Handled by drawSmartRounded inside its logic or we let standard outline proceed
+        ctx.stroke();
+      } else {
+        ctx.stroke();
+      }
+    } else {
+      ctx.fill();
+    }
+  }
+
+  static drawSmartRounded(ctx, posX, posY, drawSize, r, cellScale, x, y, grid, gridSize, cell, state) {
+    let tl = r, tr = r, br = r, bl = r;
+    const isStandard = state.connectionStyle === 'standard';
+
+    if (isStandard) {
+      const sT = this.checkMatch(x, y, 0, -1, grid, gridSize, cell, state);
+      const sR = this.checkMatch(x, y, 1, 0, grid, gridSize, cell, state);
+      const sB = this.checkMatch(x, y, 0, 1, grid, gridSize, cell, state);
+      const sL = this.checkMatch(x, y, -1, 0, grid, gridSize, cell, state);
+      
+      const sTL = this.checkMatch(x, y, -1, -1, grid, gridSize, cell, state);
+      const sTR = this.checkMatch(x, y, 1, -1, grid, gridSize, cell, state);
+      const sBR = this.checkMatch(x, y, 1, 1, grid, gridSize, cell, state);
+      const sBL = this.checkMatch(x, y, -1, 1, grid, gridSize, cell, state);
+
+      tl *= (1 - this.getConnStrength(cellScale, Math.max(sT, sL, sTL)));
+      tr *= (1 - this.getConnStrength(cellScale, Math.max(sT, sR, sTR)));
+      br *= (1 - this.getConnStrength(cellScale, Math.max(sB, sR, sBR)));
+      bl *= (1 - this.getConnStrength(cellScale, Math.max(sB, sL, sBL)));
+    }
+
+    if (ctx.roundRect) {
+      ctx.roundRect(posX, posY, drawSize, drawSize, [tl, tr, br, bl]);
+    } else {
+      this.drawRoundedRectFallback(ctx, posX, posY, drawSize, drawSize, tl, tr, br, bl);
     }
   }
 
@@ -150,12 +174,12 @@ export class LogoRenderer {
       const getActiveScale = (nx, ny) => {
         if (nx < 0 || ny < 0 || nx >= gridSize || ny >= gridSize) return 0;
         const c = grid[ny][nx];
-        return (c.active) ? c.scale : 0;
+        return (c.active && c.shape === 'rounded') ? c.scale : 0;
       };
       
       const getActiveColor = (nx, ny) => {
         if (nx < 0 || ny < 0 || nx >= gridSize || ny >= gridSize) return null;
-        return grid[ny][nx].active ? grid[ny][nx].color : null;
+        return (grid[ny][nx].active && grid[ny][nx].shape === 'rounded') ? grid[ny][nx].color : null;
       };
 
       for (let jy = 0; jy <= gridSize; jy++) {
@@ -210,6 +234,7 @@ export class LogoRenderer {
         for (let x = 0; x < gridSize; x++) {
           const cell = grid[y][x];
           if (!cell.active || cell.scale <= 0) continue;
+          if (cell.shape !== 'rounded' && cell.shape !== 'square') continue;
           
           if (isStandard && !isOutline) ctx.fillStyle = cell.color;
           if (isLine) {
@@ -224,12 +249,12 @@ export class LogoRenderer {
           for (let d = 1; d <= state.connectionDistance; d++) {
             if (x + d >= gridSize) break;
             const target = grid[y][x + d];
-            if (target.active && target.color === cell.color) {
+            if (target.active && target.color === cell.color && (target.shape === 'rounded' || target.shape === 'square')) {
               const strength = this.getConnStrength(cell.scale, target.scale);
               if (strength <= 0) break;
 
               if (isStandard) {
-                const o = 0.5;
+                const o = 0.75; // Increased overlap bleed to ensure no gaps at connections
                 const effScale = scale * strength;
                 const yCenter = (y + 0.5) * cellSize;
                 const halfH = (effScale * cellSize) / 2;
@@ -237,17 +262,7 @@ export class LogoRenderer {
                 const yBottom = yCenter + halfH;
                 
                 if (isOutline) {
-                  const blockHalfW = (scale * cell.scale * cellSize) / 2;
-                  const targetHalfW = (scale * target.scale * cellSize) / 2;
-                  const lineXStart = (x + 0.5) * cellSize + blockHalfW;
-                  const lineXEnd = (x + d + 0.5) * cellSize - targetHalfW;
-                  
-                  if (lineXEnd > lineXStart) {
-                    ctx.beginPath();
-                    ctx.moveTo(lineXStart - o, yTop); ctx.lineTo(lineXEnd + o, yTop);
-                    ctx.moveTo(lineXStart - o, yBottom); ctx.lineTo(lineXEnd + o, yBottom);
-                    ctx.stroke();
-                  }
+                   // Skip outline connections for simplicity in this pass
                 } else {
                   ctx.fillRect((x + 0.5) * cellSize - o, yTop - o, d * cellSize + o * 2, (yBottom - yTop) + o * 2);
                 }
@@ -267,12 +282,12 @@ export class LogoRenderer {
           for (let d = 1; d <= state.connectionDistance; d++) {
             if (y + d >= gridSize) break;
             const target = grid[y + d][x];
-            if (target.active && target.color === cell.color) {
+            if (target.active && target.color === cell.color && (target.shape === 'rounded' || target.shape === 'square')) {
               const strength = this.getConnStrength(cell.scale, target.scale);
               if (strength <= 0) break;
 
               if (isStandard) {
-                const o = 0.5;
+                const o = 0.75; // Increased overlap bleed to ensure no gaps at connections
                 const effScale = scale * strength;
                 const xCenter = (x + 0.5) * cellSize;
                 const halfW = (effScale * cellSize) / 2;
@@ -280,17 +295,7 @@ export class LogoRenderer {
                 const xRight = xCenter + halfW;
                 
                 if (isOutline) {
-                  const blockHalfH = (scale * cell.scale * cellSize) / 2;
-                  const targetHalfH = (scale * target.scale * cellSize) / 2;
-                  const lineYStart = (y + 0.5) * cellSize + blockHalfH;
-                  const lineYEnd = (y + d + 0.5) * cellSize - targetHalfH;
-                  
-                  if (lineYEnd > lineYStart) {
-                    ctx.beginPath();
-                    ctx.moveTo(xLeft, lineYStart - o); ctx.lineTo(xLeft, lineYEnd + o);
-                    ctx.moveTo(xRight, lineYStart - o); ctx.lineTo(xRight, lineYEnd + o);
-                    ctx.stroke();
-                  }
+                   // Skip outline
                 } else {
                   ctx.fillRect(xLeft - o, (y + 0.5) * cellSize - o, (xRight - xLeft) + o * 2, d * cellSize + o * 2);
                 }
@@ -303,41 +308,6 @@ export class LogoRenderer {
                 ctx.globalAlpha = 1.0;
               }
               break;
-            }
-          }
-          
-          if (isLine) {
-            for (let d = 1; d <= state.connectionDistance; d++) {
-              if (x + d >= gridSize || y + d >= gridSize) break;
-              const target = grid[y + d][x + d];
-              if (target.active && target.color === cell.color) {
-                 const strength = this.getConnStrength(cell.scale, target.scale);
-                 if (strength > 0) {
-                    ctx.globalAlpha = strength;
-                    ctx.beginPath();
-                    ctx.moveTo((x + 0.5) * cellSize, (y + 0.5) * cellSize);
-                    ctx.lineTo((x + d + 0.5) * cellSize, (y + d + 0.5) * cellSize);
-                    ctx.stroke();
-                    ctx.globalAlpha = 1.0;
-                 }
-                 break;
-              }
-            }
-            for (let d = 1; d <= state.connectionDistance; d++) {
-              if (x + d >= gridSize || y - d < 0) break;
-              const target = grid[y - d][x + d];
-              if (target.active && target.color === cell.color) {
-                 const strength = this.getConnStrength(cell.scale, target.scale);
-                 if (strength > 0) {
-                    ctx.globalAlpha = strength;
-                    ctx.beginPath();
-                    ctx.moveTo((x + 0.5) * cellSize, (y + 0.5) * cellSize);
-                    ctx.lineTo((x + d + 0.5) * cellSize, (y - d + 0.5) * cellSize);
-                    ctx.stroke();
-                    ctx.globalAlpha = 1.0;
-                 }
-                 break;
-              }
             }
           }
         }
@@ -359,41 +329,42 @@ export class LogoRenderer {
 
   static pathFillet(ctx, x, y, r, corner, onlyArc) {
     ctx.beginPath();
+    const b = 0.5; // Bleed factor for fillets
     if (corner === 0) {
        if (onlyArc) {
          ctx.arc(x + r, y + r, r, Math.PI, 1.5 * Math.PI, false);
        } else {
-         ctx.moveTo(x, y);
-         ctx.lineTo(x, y + r);
+         ctx.moveTo(x - b, y - b);
+         ctx.lineTo(x - b, y + r + b);
          ctx.arc(x + r, y + r, r, Math.PI, 1.5 * Math.PI, false);
-         ctx.lineTo(x, y);
+         ctx.lineTo(x - b, y - b);
        }
     } else if (corner === 1) {
        if (onlyArc) {
          ctx.arc(x - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI, false);
        } else {
-         ctx.moveTo(x, y);
-         ctx.lineTo(x - r, y);
+         ctx.moveTo(x + b, y - b);
+         ctx.lineTo(x - r - b, y - b);
          ctx.arc(x - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI, false);
-         ctx.lineTo(x, y);
+         ctx.lineTo(x + b, y - b);
        }
     } else if (corner === 2) {
        if (onlyArc) {
          ctx.arc(x - r, y - r, r, 0, 0.5 * Math.PI, false);
        } else {
-         ctx.moveTo(x, y);
-         ctx.lineTo(x, y - r);
+         ctx.moveTo(x + b, y + b);
+         ctx.lineTo(x + b, y - r - b);
          ctx.arc(x - r, y - r, r, 0, 0.5 * Math.PI, false);
-         ctx.lineTo(x, y);
+         ctx.lineTo(x + b, y + b);
        }
     } else if (corner === 3) {
        if (onlyArc) {
          ctx.arc(x + r, y - r, r, 0.5 * Math.PI, Math.PI, false);
        } else {
-         ctx.moveTo(x, y);
-         ctx.lineTo(x + r, y);
+         ctx.moveTo(x - b, y + b);
+         ctx.lineTo(x + r + b, y + b);
          ctx.arc(x + r, y - r, r, 0.5 * Math.PI, Math.PI, false);
-         ctx.lineTo(x, y);
+         ctx.lineTo(x - b, y + b);
        }
     }
     if (!onlyArc) ctx.closePath();

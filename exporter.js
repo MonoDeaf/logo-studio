@@ -130,6 +130,33 @@ class SVGContext {
     this.currentPath = "";
   }
 
+  clearRect(x, y, w, h) {
+    // Optional: could implement if needed for SVG, but BackgroundRenderer handles it
+  }
+
+  rect(x, y, w, h) {
+    this.moveTo(x, y);
+    this.lineTo(x + w, y);
+    this.lineTo(x + w, y + h);
+    this.lineTo(x, y + h);
+    this.closePath();
+  }
+
+  roundRect(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    const [tl, tr, br, bl] = r;
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + tr);
+    this.lineTo(x + w, y + h - br);
+    this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+    this.lineTo(x + bl, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - bl);
+    this.lineTo(x, y + tl);
+    this.quadraticCurveTo(x, y, x + tl, y);
+    this.closePath();
+  }
+
   moveTo(x, y) {
     this.currentPath += `M ${this.fmt(x)} ${this.fmt(y)} `;
   }
@@ -149,24 +176,33 @@ class SVGContext {
     const endY = y + r * Math.sin(endAngle);
 
     if (!this.currentPath) {
-        this.moveTo(startX, startY);
+      this.moveTo(startX, startY);
     } else {
-        this.currentPath += `L ${this.fmt(startX)} ${this.fmt(startY)} `;
+      this.currentPath += `L ${this.fmt(startX)} ${this.fmt(startY)} `;
     }
 
     let diff = endAngle - startAngle;
-    if (!counterclockwise) {
+    const isFullCircle = Math.abs(Math.abs(diff) - Math.PI * 2) < 0.001;
+
+    if (isFullCircle) {
+      const midAngle = startAngle + Math.PI * (counterclockwise ? -1 : 1);
+      const midX = x + r * Math.cos(midAngle);
+      const midY = y + r * Math.sin(midAngle);
+      const sweepFlag = counterclockwise ? 0 : 1;
+      this.currentPath += `A ${this.fmt(r)} ${this.fmt(r)} 0 1 ${sweepFlag} ${this.fmt(midX)} ${this.fmt(midY)} `;
+      this.currentPath += `A ${this.fmt(r)} ${this.fmt(r)} 0 1 ${sweepFlag} ${this.fmt(endX)} ${this.fmt(endY)} `;
+    } else {
+      if (!counterclockwise) {
         while (diff < 0) diff += Math.PI * 2;
         while (diff >= Math.PI * 2) diff -= Math.PI * 2;
-    } else {
+      } else {
         while (diff > 0) diff -= Math.PI * 2;
         while (diff <= -Math.PI * 2) diff += Math.PI * 2;
+      }
+      const largeArcFlag = Math.abs(diff) > Math.PI ? 1 : 0;
+      const sweepFlag = counterclockwise ? 0 : 1;
+      this.currentPath += `A ${this.fmt(r)} ${this.fmt(r)} 0 ${largeArcFlag} ${sweepFlag} ${this.fmt(endX)} ${this.fmt(endY)} `;
     }
-    
-    const largeArcFlag = Math.abs(diff) > Math.PI ? 1 : 0;
-    const sweepFlag = counterclockwise ? 0 : 1;
-    
-    this.currentPath += `A ${this.fmt(r)} ${this.fmt(r)} 0 ${largeArcFlag} ${sweepFlag} ${this.fmt(endX)} ${this.fmt(endY)} `;
   }
 
   closePath() {

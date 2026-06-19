@@ -7,91 +7,234 @@
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header class="top-bar">
-      <div class="brand">
-        <iconify-icon icon="pixelarticons:artboard" class="logo-icon"></iconify-icon>
-      </div>
-      
-      <div class="actions">
-        <div class="tool-group">
-          <button id="drawTool" class="tool-btn active" title="Draw">
-            <iconify-icon icon="pixelarticons:edit"></iconify-icon>
-            <span>Draw</span>
-          </button>
-          <button id="eraseTool" class="tool-btn" title="Erase">
-            <iconify-icon icon="pixelarticons:close"></iconify-icon>
-            <span>Erase</span>
-          </button>
+  <div class="app-layout">
+    <!-- Left Sidebar: Components/Shapes -->
+    <aside class="sidebar left-sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <iconify-icon icon="pixelarticons:artboard" class="logo-icon"></iconify-icon>
+          <span class="logo-text">Components</span>
         </div>
-        
-        <div class="v-divider"></div>
-        
-        <button id="uploadBtn" class="action-btn" title="Upload Image">
-          <iconify-icon icon="pixelarticons:image"></iconify-icon>
-        </button>
-        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-        
-        <button id="clearBtn" class="action-btn" title="Clear Grid">
+        <button id="clearBtn" class="icon-btn-small" title="Clear All">
           <iconify-icon icon="pixelarticons:trash"></iconify-icon>
         </button>
-        
-        <div class="v-divider"></div>
-        
-        <details class="export-dropdown">
-          <summary class="export-summary">
-            <iconify-icon icon="pixelarticons:download"></iconify-icon>
-            <span>Export</span>
-            <iconify-icon icon="pixelarticons:chevron-down" class="chevron"></iconify-icon>
-          </summary>
-          <div class="export-menu">
-            <button id="exportPngBtn" class="menu-item">
-              <iconify-icon icon="pixelarticons:image"></iconify-icon>
-              <span>PNG Image</span>
+      </div>
+      
+      <div class="sidebar-content" id="canvasLeftPanel">
+        <div class="component-section">
+          <div class="section-label">Basic Shapes</div>
+          <div class="shape-grid" id="shapeSelector">
+            <button class="shape-btn active" data-shape="rounded" title="Rounded Square">
+              <div class="shape-preview rounded"></div>
             </button>
-            <button id="exportSvgBtn" class="menu-item">
-              <iconify-icon icon="pixelarticons:code"></iconify-icon>
-              <span>SVG Vector</span>
+            <button class="shape-btn" data-shape="square" title="Full Square">
+              <div class="shape-preview square"></div>
+            </button>
+            <button class="shape-btn" data-shape="circle" title="Full Circle">
+              <div class="shape-preview circle"></div>
+            </button>
+            <button class="shape-btn" data-shape="diagonal-tl" title="Diagonal Top-Left">
+              <div class="shape-preview diagonal-tl"></div>
+            </button>
+            <button class="shape-btn" data-shape="diagonal-tr" title="Diagonal Top-Right">
+              <div class="shape-preview diagonal-tr"></div>
+            </button>
+            <button class="shape-btn" data-shape="diagonal-bl" title="Diagonal Bottom-Left">
+              <div class="shape-preview diagonal-bl"></div>
+            </button>
+            <button class="shape-btn" data-shape="diagonal-br" title="Diagonal Bottom-Right">
+              <div class="shape-preview diagonal-br"></div>
+            </button>
+            <button class="shape-btn" data-shape="diamond" title="Diamond">
+              <div class="shape-preview diamond"></div>
+            </button>
+            <button class="shape-btn" data-shape="corner-tl" title="Corner Top-Left">
+              <div class="shape-preview corner-tl"></div>
+            </button>
+            <button class="shape-btn" data-shape="corner-tr" title="Corner Top-Right">
+              <div class="shape-preview corner-tr"></div>
+            </button>
+            <button class="shape-btn" data-shape="corner-bl" title="Corner Bottom-Left">
+              <div class="shape-preview corner-bl"></div>
+            </button>
+            <button class="shape-btn" data-shape="corner-br" title="Corner Bottom-Right">
+              <div class="shape-preview corner-br"></div>
+            </button>
+            <button class="shape-btn" data-shape="concave-tl" title="Concave Top-Left">
+              <div class="shape-preview concave-tl"></div>
+            </button>
+            <button class="shape-btn" data-shape="concave-tr" title="Concave Top-Right">
+              <div class="shape-preview concave-tr"></div>
+            </button>
+            <button class="shape-btn" data-shape="concave-bl" title="Concave Bottom-Left">
+              <div class="shape-preview concave-bl"></div>
+            </button>
+            <button class="shape-btn" data-shape="concave-br" title="Concave Bottom-Right">
+              <div class="shape-preview concave-br"></div>
+            </button>
+            <button class="shape-btn" data-shape="triangle-up" title="Triangle Up">
+              <div class="shape-preview triangle-up"></div>
+            </button>
+            <button class="shape-btn" data-shape="triangle-down" title="Triangle Down">
+              <div class="shape-preview triangle-down"></div>
+            </button>
+            <button class="shape-btn" data-shape="triangle-left" title="Triangle Left">
+              <div class="shape-preview triangle-left"></div>
+            </button>
+            <button class="shape-btn" data-shape="triangle-right" title="Triangle Right">
+              <div class="shape-preview triangle-right"></div>
+            </button>
+            <button class="shape-btn" data-shape="plus" title="Plus Shape">
+              <div class="shape-preview plus"></div>
             </button>
           </div>
-        </details>
-      </div>
-    </header>
+        </div>
 
-    <div class="toolbar-sidebar">
-      <div id="stylePresets" class="style-presets-sidebar">
-        <!-- Preset buttons will be injected here -->
-      </div>
-    </div>
+        <div class="component-section">
+          <div class="section-label">Tools</div>
+          <div class="tool-group-vertical">
+            <button id="drawTool" class="tool-btn-large active">
+              <iconify-icon icon="pixelarticons:edit"></iconify-icon>
+              <span>Draw Tool</span>
+            </button>
+            <button id="eraseTool" class="tool-btn-large">
+              <iconify-icon icon="pixelarticons:close"></iconify-icon>
+              <span>Eraser</span>
+            </button>
+          </div>
+        </div>
 
-    <div class="toolbar">
-      <div class="toolbar-content">
-        
-        <!-- Canvas Section -->
-        <details class="menu-section" open>
-          <summary>Canvas <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
-          <div class="section-body">
-            <div class="slider-group">
+        <div class="component-section">
+          <div class="section-label">Presets</div>
+          <div id="stylePresets" class="style-presets-grid"></div>
+        </div>
+      </div>
+
+      <div class="sidebar-content" id="mockupsLeftPanel" style="display: none;">
+        <div class="component-section">
+          <div class="section-label">Hero Mockup</div>
+          <div class="prop-row">
+            <button class="btn-secondary" id="heroBgUploadBtn" style="width: 100%;">Upload Background</button>
+          </div>
+        </div>
+
+        <div class="component-section">
+          <div class="section-label">Stylized Mockup</div>
+          <div class="prop-body">
+            <div class="prop-row">
+              <div class="label-with-color">
+                <label class="keep-label">Background Color</label>
+                <input type="color" id="stylizedBgColor" value="#ccff00">
+              </div>
+            </div>
+            <div class="prop-row">
+              <div class="label-with-color">
+                <label class="keep-label">Logo Color</label>
+                <input type="color" id="stylizedLogoColor" value="#000000">
+              </div>
+            </div>
+            <div class="prop-row slider-row">
+              <label>Logo Size</label>
+              <input type="range" id="stylizedLogoSize" min="100" max="800" value="380">
+            </div>
+            <div class="prop-row">
+              <label>Blend Mode</label>
+              <select id="mockupBlendMode">
+                <option value="source-over" selected>Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="darken">Darken</option>
+                <option value="lighten">Lighten</option>
+                <option value="color-dodge">Color Dodge</option>
+                <option value="color-burn">Color Burn</option>
+                <option value="hard-light">Hard Light</option>
+                <option value="soft-light">Soft Light</option>
+                <option value="difference">Difference</option>
+                <option value="exclusion">Exclusion</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content: Canvas -->
+    <main class="main-stage">
+      <div class="canvas-viewport">
+        <div class="canvas-container" id="canvasView">
+          <canvas id="gridCanvas"></canvas>
+        </div>
+        <div class="mockups-view" id="mockupsView" style="display: none;">
+          <div class="mockups-grid" id="mockupsGrid">
+            <!-- Mockups generated here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Floating Bottom Actions -->
+      <div class="bottom-bar">
+        <div class="bottom-bar-inner">
+          <div class="view-toggle">
+            <button class="view-btn active" data-view="canvas">Canvas</button>
+            <button class="view-btn" data-view="mockups">Mockups</button>
+          </div>
+          <div class="v-divider desktop-only"></div>
+          <div class="action-buttons">
+            <button class="btn-secondary" id="exportPngBtn">PNG</button>
+            <button class="btn-primary" id="exportSvgBtn">SVG</button>
+            <button class="btn-secondary mobile-only" id="mobileUploadBtn">
+              <iconify-icon icon="pixelarticons:image-plus"></iconify-icon>
+            </button>
+          </div>
+        </div>
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+      </div>
+    </main>
+
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar">
+      <button class="tab-btn" data-target="left-sidebar">
+        <iconify-icon icon="pixelarticons:list"></iconify-icon>
+        <span>Shapes</span>
+      </button>
+      <button class="tab-btn active" data-target="canvas">
+        <iconify-icon icon="pixelarticons:artboard"></iconify-icon>
+        <span>Canvas</span>
+      </button>
+      <button class="tab-btn" data-target="right-sidebar">
+        <iconify-icon icon="pixelarticons:sliders"></iconify-icon>
+        <span>Props</span>
+      </button>
+    </nav>
+
+    <!-- Right Sidebar: Properties -->
+    <aside class="sidebar right-sidebar">
+      <div class="sidebar-header">
+        <span class="logo-text">Properties</span>
+      </div>
+      
+      <div class="sidebar-content">
+        <!-- Canvas Config -->
+        <details class="prop-section" open>
+          <summary>Canvas Properties</summary>
+          <div class="prop-body">
+            <div class="prop-row">
               <label>Grid Size</label>
               <select id="gridSize">
-                <option value="4">4×4</option>
-                <option value="5">5×5</option>
-                <option value="7">7×7</option>
+                <option value="7" selected>7×7</option>
                 <option value="8">8×8</option>
                 <option value="9">9×9</option>
                 <option value="10">10×10</option>
                 <option value="11">11×11</option>
-                <option value="12" selected>12×12</option>
+                <option value="12">12×12</option>
                 <option value="13">13×13</option>
                 <option value="14">14×14</option>
-                <option value="15">15×15</option>
                 <option value="16">16×16</option>
-                <option value="21">21×21</option>
+                <option value="18">18×18</option>
+                <option value="20">20×20</option>
                 <option value="24">24×24</option>
-                <option value="25">25×25</option>
                 <option value="32">32×32</option>
-                <option value="64">64×64</option>
-                <option value="128">128×128</option>
               </select>
             </div>
             <label class="toggle-item">
@@ -101,147 +244,130 @@
           </div>
         </details>
 
-        <!-- Block Styling Section -->
-        <details class="menu-section" open>
-          <summary>Block Style <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
-          <div class="section-body">
-            <div class="slider-group">
+        <!-- Block Styling -->
+        <details class="prop-section" open>
+          <summary>Shape Properties</summary>
+          <div class="prop-body">
+            <div class="prop-row">
               <label>Color</label>
-              <div class="color-swatch-group" id="blockColorGroup">
-                <input type="color" id="colorPicker" value="#ffffff" title="Custom Color">
+              <div class="color-picker-wrap">
+                <div class="swatch-list" id="blockColorGroup"></div>
+                <input type="color" id="colorPicker" value="#ffffff">
               </div>
             </div>
-            <div class="slider-group">
-              <label for="roundness">Roundness</label>
+            <div class="prop-row slider-row">
+              <label>Roundness</label>
               <input type="range" id="roundness" min="0" max="50" value="20">
             </div>
-            <div class="slider-group">
-              <label for="blockSize">Size</label>
+            <div class="prop-row slider-row">
+              <label>Scale</label>
               <input type="range" id="blockSize" min="10" max="100" value="100">
             </div>
-            <div class="slider-group">
-              <div class="control-row" style="width: 100%; margin-bottom: 0;">
-                <label for="outlineWidth">Outline</label>
-                <input type="color" id="outlineColor" value="#000000" title="Outline Color" style="width: 18px; height: 18px;">
+            <div class="prop-row">
+              <div class="label-with-color">
+                <label class="keep-label">Outline Color</label>
+                <input type="color" id="outlineColor" value="#000000">
               </div>
-              <input type="range" id="outlineWidth" min="0" max="20" value="0">
+            </div>
+            <div class="prop-row slider-row">
+              <label>Outline Width</label>
+              <input type="range" id="outlineWidth" min="0" max="15" value="0">
             </div>
           </div>
         </details>
 
-        <!-- FX Section -->
-        <details class="menu-section">
-          <summary>Effects <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
-          <div class="section-body">
-            <div class="slider-group">
-              <label for="bloom">Bloom</label>
-              <input type="range" id="bloom" min="0" max="100" value="0">
-            </div>
-            <div class="slider-group">
-              <label for="grain">Grain Intensity</label>
-              <input type="range" id="grain" min="0" max="100" value="0">
-            </div>
-            <div class="slider-group">
-              <label for="grainSize">Grain Size</label>
-              <input type="range" id="grainSize" min="1" max="10" step="0.5" value="1" disabled>
-            </div>
-            <div class="slider-group">
-              <label>Box Shadow</label>
-              <div class="control-row">
-                <input type="color" id="shadowColor" value="#000000">
-                <div class="slider-inner">
-                  <label for="shadowBlur">Blur</label>
-                  <input type="range" id="shadowBlur" min="0" max="100" value="0">
-                </div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Connections Section -->
-        <details class="menu-section">
-          <summary>Connections <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
-          <div class="section-body">
-            <label class="toggle-item" style="margin-bottom: 12px;">
+        <!-- Connections -->
+        <details class="prop-section">
+          <summary>Connections</summary>
+          <div class="prop-body">
+            <label class="toggle-item">
               <input type="checkbox" id="toggleConnections" checked>
-              <span>Enable Connections</span>
+              <span>Enable Smart Join</span>
             </label>
-            <div class="slider-group">
-              <label>Style</label>
+            <div class="prop-row">
+              <label>Join Style</label>
               <select id="connectionStyle">
-                <option value="standard" selected>Standard</option>
-                <option value="line">Line Only</option>
+                <option value="standard" selected>Morph</option>
+                <option value="line">Lines</option>
               </select>
             </div>
-            <div id="lineOnlyControls" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
-              <div class="slider-group">
-                <label for="connectionDistance">Distance</label>
-                <input type="range" id="connectionDistance" min="1" max="4" value="1">
-              </div>
-              <div class="slider-group">
-                <label for="connectionThickness">Line Thickness</label>
-                <input type="range" id="connectionThickness" min="1" max="20" value="2">
-              </div>
+            <div id="lineOnlyControls" style="display:none">
+               <div class="prop-row slider-row">
+                 <label>Line Width</label>
+                 <input type="range" id="connectionThickness" min="1" max="20" value="2">
+               </div>
             </div>
           </div>
         </details>
 
-        <!-- Background Section -->
-        <details class="menu-section">
-          <summary>Background <iconify-icon icon="pixelarticons:chevron-down" class="menu-arrow"></iconify-icon></summary>
-          <div class="section-body">
-            <div class="slider-group">
+        <!-- Effects -->
+        <details class="prop-section">
+          <summary>Effects</summary>
+          <div class="prop-body">
+            <div class="prop-row slider-row">
+              <label>Bloom</label>
+              <input type="range" id="bloom" min="0" max="100" value="0">
+            </div>
+            <div class="prop-row slider-row">
+              <label>Grain</label>
+              <input type="range" id="grain" min="0" max="100" value="0">
+            </div>
+            <div class="prop-row">
+              <div class="label-with-color">
+                <label class="keep-label">Shadow Color</label>
+                <input type="color" id="shadowColor" value="#000000">
+              </div>
+            </div>
+            <div class="prop-row slider-row">
+              <label>Shadow Blur</label>
+              <input type="range" id="shadowBlur" min="0" max="100" value="0">
+            </div>
+          </div>
+        </details>
+
+        <!-- Background -->
+        <details class="prop-section">
+          <summary>Background</summary>
+          <div class="prop-body">
+            <div class="prop-row">
               <label>Mode</label>
               <select id="bgType">
                 <option value="solid">Solid</option>
                 <option value="gradient">Gradient</option>
-                <option value="transparent">Transparent</option>
+                <option value="transparent" selected>Transparent</option>
               </select>
             </div>
-            
-            <div id="solidBgControls" class="control-row" style="margin-top: 4px;">
-              <div class="color-swatch-group" id="solidBgGroup">
-                <input type="color" id="bgColor" value="#000000" title="Custom Background Color">
+            <div id="solidBgControls" style="display:none">
+              <div class="color-picker-wrap">
+                <div class="swatch-list" id="solidBgGroup"></div>
+                <input type="color" id="bgColor" value="#000000">
               </div>
             </div>
-
-            <div id="gradientBgControls" style="display: none; flex-direction: column; gap: 12px; margin-top: 8px;">
-              <div class="color-swatch-group" id="gradientSwatches"></div>
-              <div class="slider-group">
-                <label>Gradient Type</label>
+            <div id="gradientBgControls" style="display:none">
+              <div id="gradientSwatches" class="swatch-list"></div>
+              <div class="prop-row">
+                <label>Type</label>
                 <select id="gradientType">
                   <option value="linear">Linear</option>
                   <option value="radial">Radial</option>
                 </select>
               </div>
-              <div class="slider-group-inline">
-                <input type="color" id="bgGradStart" value="#ffffff">
-                <div class="slider-inner">
-                  <label for="gradientStopStart">Start</label>
-                  <input type="range" id="gradientStopStart" min="0" max="100" value="0">
+              <div class="prop-row">
+                <label>Colors</label>
+                <div class="dual-color">
+                  <input type="color" id="bgGradStart" value="#ffffff">
+                  <input type="color" id="bgGradEnd" value="#000000">
                 </div>
               </div>
-              <div class="slider-group-inline">
-                <input type="color" id="bgGradEnd" value="#e0e0e0">
-                <div class="slider-inner">
-                  <label for="gradientStopEnd">End</label>
-                  <input type="range" id="gradientStopEnd" min="0" max="100" value="100">
-                </div>
-              </div>
-              <div class="slider-group" id="gradientAngleControl">
-                <label for="gradientAngle">Angle</label>
+              <div class="prop-row slider-row" id="gradientAngleControl">
+                <label>Angle</label>
                 <input type="range" id="gradientAngle" min="0" max="360" value="135">
               </div>
             </div>
           </div>
         </details>
-
       </div>
-    </div>
-    
-    <div class="canvas-container">
-      <canvas id="gridCanvas"></canvas>
-    </div>
+    </aside>
   </div>
   
   <script type="importmap">

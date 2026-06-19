@@ -10,8 +10,11 @@ const renderer = new Renderer(canvas, state);
 const exporter = new Exporter(state, renderer);
 new UI(state, renderer, exporter);
 
-renderer.updateCanvasSize();
-renderer.start();
+// Ensure layout is settled before initial sizing
+setTimeout(() => {
+  renderer.updateCanvasSize();
+  renderer.start();
+}, 50);
 
 // Tombstones
 // removed class LogoCreator {}

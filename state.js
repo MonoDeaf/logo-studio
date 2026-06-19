@@ -1,11 +1,12 @@
 export class State {
   constructor() {
-    this.gridSize = 12;
+    this.gridSize = 7;
     this.cellSize = 10;
     this.currentColor = '#ffffff';
+    this.currentShape = 'rounded'; // Current brush shape
     this.grid = [];
     this.isDrawing = false;
-    this.tool = 'draw'; // 'draw' or 'erase'
+    this.tool = 'draw'; 
     
     // Rendering parameters
     this.blockScale = 1.0;
@@ -19,19 +20,26 @@ export class State {
     this.showConnections = true;
     this.connectionDistance = 1;
     this.connectionThickness = 2;
-    this.connectionStyle = 'standard'; // 'standard' or 'line'
+    this.connectionStyle = 'standard';
 
     this.shadowColor = '#000000';
     this.shadowBlur = 0;
 
-    this.bgType = 'solid';
+    this.bgType = 'transparent';
     this.bgColor = '#000000';
     this.bgGradStart = '#ffffff';
-    this.bgGradEnd = '#e0e0e0';
+    this.bgGradEnd = '#000000';
     this.gradientType = 'linear';
     this.gradientAngle = 135;
     this.gradientStopStart = 0;
     this.gradientStopEnd = 100;
+
+    this.heroBgImage = null; // Cache for hero mockup background
+
+    this.stylizedMockupBg = '#ccff00';
+    this.stylizedMockupLogo = '#ffffff';
+    this.stylizedMockupSize = 380;
+    this.mockupBlendMode = 'source-over';
 
     this.initGrid();
   }
@@ -40,6 +48,7 @@ export class State {
     this.grid = Array(this.gridSize).fill(null).map(() => 
       Array(this.gridSize).fill(null).map(() => ({
         color: this.currentColor,
+        shape: this.currentShape,
         active: false,
         scale: 0
       }))
@@ -56,11 +65,12 @@ export class State {
     if (this.tool === 'erase') {
       cell.active = false;
     } else {
-      if (cell.active) {
+      if (cell.active && cell.shape === this.currentShape && cell.color === this.currentColor) {
         cell.active = false;
       } else {
         cell.active = true;
         cell.color = this.currentColor;
+        cell.shape = this.currentShape;
       }
     }
   }
@@ -72,6 +82,7 @@ export class State {
     } else {
       cell.active = true;
       cell.color = this.currentColor;
+      cell.shape = this.currentShape;
     }
   }
 

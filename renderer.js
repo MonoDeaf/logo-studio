@@ -49,13 +49,18 @@ export class Renderer {
   }
 
   updateCanvasSize() {
-    const container = document.querySelector('.canvas-container');
+    const viewport = document.querySelector('.canvas-viewport');
+    if (!viewport) return;
+
+    // Use viewport dimensions instead of container to avoid zero-size chicken-and-egg issues
+    // Padding 140 accounts for .canvas-viewport padding (80px total) + .canvas-container padding (40px total) + safety buffer
+    const padding = 140; 
     const maxSize = Math.min(
-      container.clientWidth - 20,
-      container.clientHeight - 20
+      viewport.clientWidth - padding,
+      viewport.clientHeight - padding
     );
     
-    this.state.cellSize = Math.floor(maxSize / this.state.gridSize);
+    this.state.cellSize = Math.max(8, Math.floor(maxSize / this.state.gridSize));
     const canvasSize = this.state.cellSize * this.state.gridSize;
     
     this.canvas.width = canvasSize;
@@ -63,16 +68,18 @@ export class Renderer {
   }
 
   render() {
-    this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.state.cellSize, this.state.gridSize, this.state.grid, true);
+    this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.state.cellSize, this.state.gridSize, this.state.grid, true, true);
   }
 
-  drawScene(ctx, width, height, cellSize, gridSize, grid, drawGridLines) {
+  drawScene(ctx, width, height, cellSize, gridSize, grid, drawGridLines, drawBackground = true) {
     const buffer = document.createElement('canvas');
     buffer.width = width;
     buffer.height = height;
     const bctx = buffer.getContext('2d');
 
-    BackgroundRenderer.draw(ctx, width, height, this.state);
+    if (drawBackground) {
+      BackgroundRenderer.draw(ctx, width, height, this.state);
+    }
 
     if (drawGridLines && this.state.showGrid) {
       this.drawGridLines(ctx, width, height, cellSize, gridSize);
