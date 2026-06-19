@@ -120,7 +120,11 @@ body {
   color: #fff;
 }
 
-.export-btn {
+.export-dropdown {
+  position: relative;
+}
+
+.export-summary {
   background: #fff;
   color: #000;
   border: none;
@@ -131,10 +135,52 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  list-style: none;
 }
 
-.export-btn:hover {
+.export-summary:hover {
   background: #e0e0e0;
+}
+
+.export-summary::-webkit-details-marker {
+  display: none;
+}
+
+.export-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+  z-index: 1000;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: #ccc;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.menu-item:hover {
+  background: #222;
+  color: #fff;
 }
 
 .toolbar {

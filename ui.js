@@ -222,8 +222,22 @@ export class UI {
       this.renderer.render();
     });
     
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      this.exporter.export();
+    document.getElementById('exportPngBtn').addEventListener('click', () => {
+      this.exporter.exportImage();
+      document.querySelector('.export-dropdown').removeAttribute('open');
+    });
+
+    document.getElementById('exportSvgBtn').addEventListener('click', () => {
+      this.exporter.exportSVG();
+      document.querySelector('.export-dropdown').removeAttribute('open');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.querySelector('.export-dropdown');
+      if (dropdown && dropdown.hasAttribute('open') && !dropdown.contains(e.target)) {
+        dropdown.removeAttribute('open');
+      }
     });
 
     document.getElementById('roundness').addEventListener('input', (e) => {

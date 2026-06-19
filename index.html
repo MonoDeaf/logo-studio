@@ -38,10 +38,23 @@
         
         <div class="v-divider"></div>
         
-        <button id="exportBtn" class="export-btn">
-          <iconify-icon icon="pixelarticons:download"></iconify-icon>
-          <span>Export</span>
-        </button>
+        <details class="export-dropdown">
+          <summary class="export-summary">
+            <iconify-icon icon="pixelarticons:download"></iconify-icon>
+            <span>Export</span>
+            <iconify-icon icon="pixelarticons:chevron-down" class="chevron"></iconify-icon>
+          </summary>
+          <div class="export-menu">
+            <button id="exportPngBtn" class="menu-item">
+              <iconify-icon icon="pixelarticons:image"></iconify-icon>
+              <span>PNG Image</span>
+            </button>
+            <button id="exportSvgBtn" class="menu-item">
+              <iconify-icon icon="pixelarticons:code"></iconify-icon>
+              <span>SVG Vector</span>
+            </button>
+          </div>
+        </details>
       </div>
     </header>
 
